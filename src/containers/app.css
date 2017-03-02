@@ -1,0 +1,15 @@
+.container {
+	display: flex;
+}
+
+.field {
+	flex: 1;
+	text-align: center;
+	height: 20px;
+	width: 20px;
+	border: 1px inset;
+}
+
+.clear-all {
+	clear: both;
+}
