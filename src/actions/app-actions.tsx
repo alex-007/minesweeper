@@ -1,19 +1,22 @@
 import {Action, ActionStatus} from './actions'
 import {MyDispatch} from '../utils/reduxUtils'
 import Loader from '../utils/loader'
+import {Point, CellState} from '../state/cell-state'
 
 export const Actions = {
 	GetNewBoard: 'GetNewBoard',
-	GetFieldState: 'GetFieldState'
+	GetCellState: 'GetCellState',
+	SetCellUserMark: 'SetCellUserMark'
 }
 
 export type GetNewBoardPayload = {
-	status: ActionStatus
+	status: ActionStatus,
+	cellsState?: CellState[]
 }
 
 export type GetNewBoardAction = Action<GetNewBoardPayload>
 
-function getNewBoard(width: number, height: number) {
+function getNewBoard(width: number, height: number, mines: number, forceInit: boolean) {
 	return (dispatch: MyDispatch) => {
 		let loader = new Loader()
 
@@ -24,68 +27,113 @@ function getNewBoard(width: number, height: number) {
 			}
 		} as GetNewBoardAction)
 
-		loader.getNewBoard(width, height)
+		loader.getNewBoard(width, height, mines, forceInit)
 			.catch((err) => {
 				dispatch({
 					type: Actions.GetNewBoard,
 					payload: {
-						status: ActionStatus.Failed
+						status: ActionStatus.Failed,
+						message: err
 					}
 				} as GetNewBoardAction)
 				throw err
 			})
-			.then(() => {
+			.then(cellsState => {
 				dispatch({
 					type: Actions.GetNewBoard,
 					payload: {
-						status: ActionStatus.Completed
+						status: ActionStatus.Completed,
+						cellsState
 					}
 				} as GetNewBoardAction)
 			})
 	}
 }
 
-export type GetFieldStatePayload = {
+export type GetCellStatePayload = {
 	status: ActionStatus
-	fieldState?: string
+	cellsState?: CellState[]
 }
 
-export type GetFieldStateAction = Action<GetFieldStatePayload>
+export type GetCellStateAction = Action<GetCellStatePayload>
 
-function getFieldState(x: number, y: number) {
+function getCellState(point: Point) {
 	return (dispatch: MyDispatch) => {
 		let loader = new Loader()
 
 		dispatch({
-			type: Actions.GetFieldState,
+			type: Actions.GetCellState,
 			payload: {
 				status: ActionStatus.Started
 			}
-		} as GetFieldStateAction)
+		} as GetCellStateAction)
 
-		loader.getFieldState(x, y)
+		loader.getCellsState(point.x, point.y)
 			.catch((err) => {
 				dispatch({
-					type: Actions.GetFieldState,
+					type: Actions.GetCellState,
 					payload: {
-						status: ActionStatus.Failed
+						status: ActionStatus.Failed,
+						message: err
 					}
-				} as GetFieldStateAction)
+				} as GetCellStateAction)
 				throw err
 			})
-			.then(fieldState => {
+			.then(cellsState => {
 				dispatch({
-					type: Actions.GetFieldState,
+					type: Actions.GetCellState,
 					payload: {
 						status: ActionStatus.Completed,
-						fieldState: fieldState as string
+						cellsState
 					}
-				} as GetFieldStateAction)
+				} as GetCellStateAction)
+			})
+	}
+}
+
+export type SetCellUserMarkPayload = {
+	status: ActionStatus
+	cellState?: CellState
+}
+
+export type SetCellUserMarkAction = Action<SetCellUserMarkPayload>
+
+function setCellUserMark(point: Point, userMark: string) {
+	return (dispatch: MyDispatch) => {
+		let loader = new Loader()
+
+		dispatch({
+			type: Actions.SetCellUserMark,
+			payload: {
+				status: ActionStatus.Started
+			}
+		} as SetCellUserMarkAction)
+
+		loader.setCellUserMark(point.x, point.y, userMark)
+			.catch((err) => {
+				dispatch({
+					type: Actions.SetCellUserMark,
+					payload: {
+						status: ActionStatus.Failed,
+						message: err
+					}
+				} as SetCellUserMarkAction)
+				throw err
+			})
+			.then(cellState => {
+				dispatch({
+					type: Actions.SetCellUserMark,
+					payload: {
+						status: ActionStatus.Completed,
+						cellState
+					}
+				} as SetCellUserMarkAction)
 			})
 	}
 }
 
 export default {
 	getNewBoard,
-	getFieldState
+	getCellState,
+	setCellUserMark
 }

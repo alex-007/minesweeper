@@ -1,9 +1,11 @@
 import {Action} from '../actions/actions'
 import {AppState} from '../state/app-state'
 import appReducer from './app-reducer'
+import timerReducer from './timer-reducer'
 
 const reducersMap = Object.assign({},
-	appReducer
+	appReducer,
+	timerReducer
 ) as any
 
 export function rootReducer(state: AppState, action: Action<any>): AppState {

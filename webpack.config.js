@@ -24,17 +24,45 @@ const config = {
 
 	module: {
 		loaders: [
-			// All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
 			{
 				test: /\.tsx?$/,
-				loaders: [
-					'babel-loader?presets[]=react-hmre&presets[]=es2015&presets[]=stage-0&plugins[]=react-hot-loader/babel',
-					'ts-loader'
+				use: [
+					{
+						loader: 'babel-loader',
+						options: {
+							presets: [
+								'react-hmre',
+								'es2015',
+								'stage-0'
+							],
+							plugins: [
+								'react-hot-loader/babel',
+								'transform-runtime'
+							]
+						},
+					},
+					{
+						loader: 'ts-loader'
+					}
 				]
 			},
 			{
 				test: /\.css$/,
-				loader: 'style-loader!css-loader?modules',
+				use: [
+					{
+						loader: 'style-loader',
+						options: {
+							useable: true
+						}
+					},
+					{
+						loader: 'css-loader',
+						options: {
+							module: true,
+							sourceMap: true
+						}
+					}
+				]
 			}
 		]
 	},

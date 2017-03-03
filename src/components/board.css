@@ -1,0 +1,8 @@
+.board {
+	display: flex;
+	border: 1px outset;
+}
+
+.clearAll {
+	clear: both;
+}

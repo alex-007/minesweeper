@@ -1,5 +1,6 @@
 import {SuperAgent, SuperAgentRequest, Response as SuperAgentResponse} from 'superagent'
 import * as superagent from 'superagent'
+import {CellState} from '../state/cell-state'
 
 export type Agent = SuperAgent<SuperAgentRequest>
 
@@ -15,50 +16,55 @@ export default class Loader {
 	send(req: SuperAgentRequest): Promise<SuperAgentResponse> {
 		req.timeout(20 * 1000)
 
-		// this.logger.trace({ data: req }, 'Request started')
-
 		return new Promise((resolve, reject) => {
 			req.end((err, res) => {
 				err = err || res.error
 				if (err) {
-					err.response = res
+					if (res.body.error) {
+						err.message = res.body.error
+					}
 					reject(err)
 				} else {
 					resolve(res)
 				}
 			})
 		})
-			.then(res => {
-				// this.logger.trace({ data: res }, 'Request completed')
-				return res
-			})
-			.catch(e => {
-				// this.logger.error(e)
-				throw e
-			})
 	}
 
-	getNewBoard(width: number, height: number) {
+	getNewBoard(width: number, height: number, mines: number, forceInit: boolean) {
 		let req = this.agent
 			.get(`/getNewBoard/`)
 			.query({
-				width, height
+				width, height, mines,
+				forceInit: forceInit ? 1 : 0
 			})
 			.withCredentials()
 			.type('json')
 
-		return this.send(req)
+		return this.send(req).then(res => res.body as CellState[])
 	}
 
-	getFieldState(x: number, y: number) {
+	getCellsState(x: number, y: number) {
 		let req = this.agent
-			.get(`/getFieldState/`)
+			.get(`/getCellsState/`)
 			.query({
 				x, y
 			})
 			.withCredentials()
 			.type('json')
 
-		return this.send(req).then(res => res.body)
+		return this.send(req).then(res => res.body as CellState[])
+	}
+
+	setCellUserMark(x: number, y: number, userMark: string) {
+		let req = this.agent
+			.get(`/setCellUserMark/`)
+			.query({
+				x, y, userMark
+			})
+			.withCredentials()
+			.type('json')
+
+		return this.send(req).then(res => res.body as CellState)
 	}
 }

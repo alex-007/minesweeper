@@ -1,15 +1,27 @@
 .container {
-	display: flex;
+	margin: auto;
+	width: 400px;
 }
 
-.field {
-	flex: 1;
+.message {
+	font-size: xx-large;
+	margin: auto;
 	text-align: center;
-	height: 20px;
-	width: 20px;
-	border: 1px inset;
+	position: relative;
+	top: -200px;
 }
 
-.clear-all {
+.gameOver {
+	composes: message;
+	color: red;
+}
+
+.congratulations {
+	composes: message;
+	color: green;
+}
+
+.newGame {
 	clear: both;
+	text-align: center;
 }

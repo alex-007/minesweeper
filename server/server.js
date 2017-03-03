@@ -1,17 +1,46 @@
+'use strict';
+
 import path from 'path'
 import {Server} from 'http'
 import Express from 'express'
 import webpack from 'webpack'
-import Session from 'express-session'
+import expressSession from 'express-session'
 import webpackConfig from '../webpack.config'
 import bodyParser from 'body-parser'
+import myRouter from './utils/router'
+import routes from './utils/routes'
+import logger from './utils/logger'
 
-//import board from 'board'
+const port = process.env.PORT || 3000
+const env = process.env.NODE_ENV || 'production'
 
 const app = new Express()
 const compiler = webpack(webpackConfig)
+const loggerOptions = {
+	name: 'minesweeper'
+}
+if (env !== 'production') {
+	loggerOptions.level = 'debug'
+}
 
+app.logger = logger(loggerOptions)
+
+const router = myRouter()
 const server = new Server(app)
+
+const sessConfig = {
+	secret: 'someSecret',
+	name: 'sessionId',
+	proxy: true,
+	resave: true,
+	saveUninitialized: true,
+	cookie: {
+		'name': 'test',
+		httpOnly: false,
+		secure: false,
+		maxAge: ((60 * 1000) * 60)
+	}
+}
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -22,23 +51,20 @@ app.use(require('webpack-dev-middleware')(compiler, {
 app.use(require('webpack-hot-middleware')(compiler))
 
 app.use(Express.static(path.join(__dirname, '../public')))
-app.use(Session({secret:'XASDASDA'}));
 
-app.get('/getNewBoard', function (req, res) {
-	const session = req.session;
+app.use(expressSession(sessConfig))
 
-	return res.sendFile(path.join(__dirname, '../view', 'index.html'))
-})
+router.map(routes)
+
+app.use('/', router)
 
 app.get('/', function (req, res) {
-	return res.sendFile(path.join(__dirname, '../view', 'index.html'))
+	res.sendFile(path.join(__dirname, '../view', 'index.html'))
 })
 
-const port = process.env.PORT || 3000
-const env = process.env.NODE_ENV || 'production'
 server.listen(port, err => {
 	if (err) {
-		return console.error(err)
+		return app.logger.error(err)
 	}
-	console.info(`Server running on http://localhost:${port} [${env}]`)
+	app.logger.info(`Server running on http://localhost:${port} [${env}]`)
 })

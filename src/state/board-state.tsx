@@ -1,5 +1,10 @@
-import {FieldState} from './field-state'
+import {CellState} from './cell-state'
+
+export interface Column {
+	id: number
+	cells: CellState[]
+}
 
 export interface BoardState {
-	fields: FieldState[][]
+	columns: Column[]
 }
