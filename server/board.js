@@ -117,7 +117,6 @@ function getCellsState (session, clickX, clickY) {
 	const board = session.board
 	const maxX = board.length - 1
 	const maxY = board[0].length - 1
-	const checkedCells = []
 
 	if (!checkPoint(clickX, clickY, maxX + 1, maxY + 1)) {
 		return {error: 'Error coordinates'}
@@ -145,14 +144,13 @@ function getCellsState (session, clickX, clickY) {
 
 		let ret = []
 
-		if (!userClick && checkedCells.some(cell => cell.x === x && cell.y === y)) {
+		if (!userClick && cell.shown) {
 			return ret
 		}
 
 		if (userClick || cell.state !== 'M') {
 			ret.push({point: {x, y}, state: cell.state})
 			cell.shown = true
-			checkedCells.push({x, y})
 		}
 
 		if (userClick && cell.state === 'M') {
